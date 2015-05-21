@@ -5,6 +5,7 @@
     Si termina en .yy -> petición país B
     Si el usuario ya no está en el AD -> mala suerte
 #>
+
 Import-Csv .\export.csv -Delimiter "," | ForEach-Object {
     #Creamos el objeto para almacenar los resultados
     $resultado = New-Object -TypeName PSObject
@@ -34,13 +35,28 @@ Import-Csv .\export.csv -Delimiter "," | ForEach-Object {
     #Si no tiene correo intentamos sacar el pais de su perfil del AD
     elseif ($usuario.mail -match "Usuario sin correo en el AD") {
         if ($usuario.c -eq "XX"){
-            $resultado | Add-Member -MemberType NoteProperty -Name pais -Value "XX _by C"
+            $resultado | Add-Member -MemberType NoteProperty -Name pais -Value "XX"
         }
         elseif($usuario.c -eq "YY"){
-            $resultado | Add-Member -MemberType NoteProperty -Name pais -Value "YY _by C"
+            $resultado | Add-Member -MemberType NoteProperty -Name pais -Value "YY"
         }
         else {
-            $resultado | Add-Member -MemberType NoteProperty -Name pais -Value "ND _by C"
+            #Intentamos sacarlo por Ciudad
+            if ($usuario.l -eq "Xxxx" -or $usuario.City -eq "Xxxx"){
+                $resultado | Add-Member -MemberType NoteProperty -Name pais -Value "XX"
+            }
+            elseif ($usuario.l -eq "Yyyy" -or $usuario.City -eq "Yyyy"){
+                $resultado | Add-Member -MemberType NoteProperty -Name pais -Value "YY"
+            }
+            #Intentamos sacarlo por expresión regular del userID
+            else{
+                if ($_.requestor -match "^aaa" -or $_.requestor -match "^bbb" -or $_.requestor -match "^ccc"){
+                    $resultado | Add-Member -MemberType NoteProperty -Name pais -Value "XX"
+                }
+                else{
+                    $resultado | Add-Member -MemberType NoteProperty -Name pais -Value "ND"
+                }    
+            }
         }
     }
     else {
